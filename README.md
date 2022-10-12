@@ -11,7 +11,7 @@ I will figure this out.
 '''
 
 ## Contributors
-README format taken from https://www.makeareadme.com/
+README format taken from *https://www.makeareadme.com/*
 
 ## License
-[MIT](https://choosealicense.com/licenses/mit/)
+[MIT](*https://choosealicense.com/licenses/mit/*)
