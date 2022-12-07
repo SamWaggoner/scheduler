@@ -10,6 +10,7 @@ Navigate to the scheduler directory, then run:
 ```bash
 gradle run
 ```
+Internal processes of the program can be seen by enabling or disabling debug (see Debug class).
 ## Contributors
 This is a solo project.
 
