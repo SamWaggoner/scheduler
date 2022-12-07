@@ -38,6 +38,11 @@ public class Week {
         this.events = week;
     }
 
+    public int createRandom(ArrayList<Task> tasks)
+    {
+        
+    }
+
 
     /*
      * Method: create
@@ -49,7 +54,7 @@ public class Week {
     public int create(ArrayList<Task> tasks)
     {
         boolean prevDebugEnabled = Debug.enabled;
-        Debug.enabled = false;
+        Debug.enabled = true;
 
         // Check if calendar already exists for object
         if (this.events != null)
@@ -197,13 +202,11 @@ public class Week {
                 if (gap >= task.hoursRequired)
                 {
                     Debug.log("Task fully inserted, at start time");
-                    Debug.log("Inserting for ", (long)(60*task.hoursRequired), " minutes");
                     // add event based off the hours required, starting at task's start time
                     Event newEvent = new Event(task.start,
                         task.start.plusMinutes((long)(60*task.hoursRequired)),
                         task);
                     events.add(i+1, newEvent);
-                    Debug.log(events.get(i+1).startTime," to ",events.get(i+1).endTime);
                     // return true, indicating a successful insertion
                     return true;
                 }

@@ -22,6 +22,7 @@
  */
 
 
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 
 
@@ -163,6 +164,9 @@ public class TaskList {
         while(leftIndex<=midIndex && rightIndex<=endIndex)
         {
             boolean lte = false;
+
+            long timeframe1;
+            long timeframe2;
             switch (att)
             {
                 case "importance":
@@ -185,8 +189,26 @@ public class TaskList {
                         (tasks.get(rightIndex).due))
                         lte = true;
                     break;
+                case "timeframe":
+                    timeframe1 = ChronoUnit.MINUTES.between(
+                        tasks.get(leftIndex).start, tasks.get(leftIndex).due);
+                    timeframe2 = ChronoUnit.MINUTES.between(
+                        tasks.get(rightIndex).start, tasks.get(rightIndex).due);
+                    if (timeframe1 < timeframe2)
+                        lte = true;
+                    break;
+                case "restriction":
+                    timeframe1 = ChronoUnit.MINUTES.between(
+                        tasks.get(leftIndex).start, tasks.get(leftIndex).due);
+                    timeframe2 = ChronoUnit.MINUTES.between(
+                        tasks.get(rightIndex).start, tasks.get(rightIndex).due);
+                    if ((timeframe1 - tasks.get(leftIndex).hoursRequired) <
+                        (timeframe2 - tasks.get(rightIndex).hoursRequired))
+                        lte = true;
+                    break;
+                
                 default:
-                    System.err.println("Error: incorrect attribute given to sortBy");
+                    Debug.err("Error: incorrect attribute given to sortBy");
             }
             if (lte)
             {
@@ -222,18 +244,4 @@ public class TaskList {
             j++;
         }
     }
-
-
-    // Not tested, since printing TaskList class generates an error
-    @Override
-    public String toString()
-    {
-        String summary = "\n\n";
-        for (int i = 0; i < tasks.size(); i++)
-        {
-            summary = summary + String.valueOf(TaskList.tasks.get(i)) + '\n';
-        }
-        return summary;
-    }
-
 }

@@ -113,34 +113,34 @@ public abstract class TaskCreator {
 
     // Add daily events to schedule: meals, sleep, recreation
     // Starts at 1 since calendar begins the next day after the program is run
-    // for (int i = 1; i < 8; i++)
-    // {
-    //   // Add breakfast
-    //   start = today.plusDays(i).atTime(7, 30, 00);
-    //   end = today.plusDays(i).atTime(10, 00, 00);
-    //   task = new Task("Breakfast", 6, 0.5, start, end);
-    //   taskList.add(task);
-    //   // Add lunch
-    //   start = today.plusDays(i).atTime(11, 00, 00);
-    //   end = today.plusDays(i).atTime(14, 30, 00);
-    //   task = new Task("Lunch", 8, 0.75, start, end);
-    //   taskList.add(task);
-    //   // Add dinner
-    //   start = today.plusDays(i).atTime(16, 30, 00);
-    //   end = today.plusDays(i).atTime(20, 00, 00);
-    //   task = new Task("Dinner", 8, 0.75, start, end);
-    //   taskList.add(task);
-    //   // Add physical activity
-    //   start = today.plusDays(i).atTime(6, 00, 00);
-    //   end = today.plusDays(i).atTime(23, 00, 00);
-    //   task = new Task("Physical Activity", 8, 1, start, end);
-    //   taskList.add(task);
-    //   // Add sleep
-    //   start = today.plusDays(i).atTime(22, 30, 00);
-    //   end = today.plusDays(i).atTime(10, 00, 00);
-    //   task = new Task("Sleep", 10, 8, start, end);
-    //   taskList.add(task);
-    // }
+    for (int i = 1; i < 8; i++)
+    {
+      // Add breakfast
+      start = today.plusDays(i).atTime(7, 30, 00);
+      end = today.plusDays(i).atTime(10, 00, 00);
+      task = new Task("Breakfast", 6, 0.5, start, end);
+      taskList.add(task);
+      // Add lunch
+      start = today.plusDays(i).atTime(11, 00, 00);
+      end = today.plusDays(i).atTime(14, 30, 00);
+      task = new Task("Lunch", 8, 0.75, start, end);
+      taskList.add(task);
+      // Add dinner
+      start = today.plusDays(i).atTime(16, 30, 00);
+      end = today.plusDays(i).atTime(20, 00, 00);
+      task = new Task("Dinner", 8, 0.75, start, end);
+      taskList.add(task);
+      // Add physical activity
+      start = today.plusDays(i).atTime(6, 00, 00);
+      end = today.plusDays(i).atTime(23, 00, 00);
+      task = new Task("Physical Activity", 8, 1, start, end);
+      taskList.add(task);
+      // Add sleep
+      start = today.plusDays(i).atTime(22, 30, 00);
+      end = today.plusDays(i).atTime(10, 00, 00);
+      task = new Task("Sleep", 10, 8, start, end);
+      taskList.add(task);
+    }
 
     // Add breakfast
     start = today.plusDays(1).atTime(7, 30, 00);
