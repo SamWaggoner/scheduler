@@ -1,0 +1,49 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Launch MyClass",
+            "request": "launch",
+            "mainClass": "MyClass",
+            "projectName": "scheduler"
+        },
+        {
+            "type": "java",
+            "name": "Launch Scheduler",
+            "request": "launch",
+            "mainClass": "Scheduler",
+            "projectName": "scheduler"
+        },
+        {
+            "type": "java",
+            "name": "Launch scheduler",
+            "request": "launch",
+            "mainClass": "scheduler",
+            "projectName": "scheduler_a985cb2"
+        },
+        {
+            "name": "Python: Current File",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": ".NET Core Launch (console)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/bin/Debug/netcoreapp3.0/OOPExample.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}",
+            "console": "internalConsole",
+            "stopAtEntry": false
+        },
+        {
+            "name": ".NET Core Attach",
+            "type": "coreclr",
+            "request": "attach",
+            "processId": "${command:pickProcess}"
+        }
+    ]
+}

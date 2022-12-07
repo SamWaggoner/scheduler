@@ -1,0 +1,13 @@
+Working 12/6/22
+
+◯ read a brick <5, 12.5, Nov 12> (Tomorrow)
+◯ file a shoe <3, 4, Today> (Tomorrow)
+◯ walk the plants <5, 7, Today> (Fri, Dec 9)
+◯ sue a jaywalker <8, 3, Oct 31> (Wed, Dec 30)
+
+Not working:
+
+◯ file a shoe <3, 4, Today> (Tomorrow)
+◯ read a brick <5, 12.5, Dec 12> (Wed, Dec 14)
+
+

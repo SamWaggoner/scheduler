@@ -1,15 +1,15 @@
-# README
-This is the README file for scheduler.
+# scheduler
+scheduler is a program for COS 470 that schedules a list of tasks.
 
 ## Installation
 No installation is required after you download the files.
 
 ## Usage
 To run the file:
-'''bash
-I will figure this out.
-'''
-
+Navigate to the scheduler directory, then run:
+```bash
+gradle run
+```
 ## Contributors
 README format taken from *https://www.makeareadme.com/*
 
