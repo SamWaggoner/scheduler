@@ -11,7 +11,7 @@ Navigate to the scheduler directory, then run:
 gradle run
 ```
 ## Contributors
-README format taken from *https://www.makeareadme.com/*
+This is a solo project.
 
 ## License
 [MIT](*https://choosealicense.com/licenses/mit/*)
