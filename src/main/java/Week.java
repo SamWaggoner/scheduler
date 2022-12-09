@@ -5,7 +5,9 @@
  * keep track of the events present. If a given interval is outside of the range
  * of every event in the week, then it is unscheduled time.
  * Attributes:
- * - int totalWorth: The total worth calculated for the calendar.
+ * - events: the week itself, represented as a series of Event objects
+ * - tasks: the task list used to create the events. events are added one-by-one
+ *      so the order of the tasks list dictates the events.
  * Bugs: none known
  * Limitations: none
  * Input Requirements: travel/transition time should be incorporated into the 
@@ -38,6 +40,15 @@ public class Week {
         this.events = week;
     }
 
+    /*
+     * Method: getWorth
+     * Description: Finds the worth of the entire week by iterating through
+     * each event and adding the total time that each task is in the week. Then,
+     * using the worth function (as seen in the documentation) calculates the
+     * worth of each task based off its time in the calendar, importance, and
+     * hours required. Sums each task's worth to get the result.
+     * Returns: the worth of the entire week
+     */
     public double getWorth()
     {
         boolean prevDebugEnabled = Debug.enabled;
@@ -79,7 +90,8 @@ public class Week {
 
     /*
      * Method: create
-     * Description: Turns a given list of tasks into a calendar of events.
+     * Description: Turns a given list of tasks into a calendar of events. Also
+     * updates the ArrayList<Task> reference for the object.
      * To enable verbose debugging information, remove the line at the top of
      * this function that turns off the debugger.
      * Returns: the number of tasks that were unable to be scheduled

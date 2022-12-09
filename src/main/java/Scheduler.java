@@ -412,7 +412,6 @@ public class Scheduler {
      *    tasks will create the same week every time. Thus, instead of modifying
      *    the week itself (which is difficult and slow because it involves
      *    constraint satisfaction), modify the order of the tasks. 
-     *    
      */
 
 
