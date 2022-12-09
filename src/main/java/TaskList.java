@@ -3,22 +3,18 @@
  * Description: Holds an ArrayList of Task objects with various useful methods
  * used for operating on that list, such as sorting.
  * Attributes: none
- * Bugs: none
+ * Bugs: none known
  * Limitations: none
  * Author: Sam Waggoner <samuel.waggoner@maine.edu>
  * Created: 12/09/22
  * For: COS 470, scheduler
  * Modifications: none
  * 
- * Note: functions divide() and merge() are adapted from:
+ * Notes:
+ * functions divide() and merge() are adapted from:
  * https://www.withexample.com/merge-sort-using-arraylist-java-example/,
  * written by Niravkumar-Patel. They have been changed to sort Task objects by
  * attribute, instead of integers.
- * 
-◯ read a brick <5, 12.5, Dec 8> (Tomorrow)
-◯ file a shoe <3, 4, Today> (Tomorrow)
-◯ walk the plants <5, 7, Today> (Fri, Dec 9)
-◯ sue a jaywalker <8, 3, Oct 31> (Wed, Dec 30)
  */
 
 
@@ -40,11 +36,12 @@ public class TaskList {
      * Description: Reverses the order of an ArrayList. It is faster to sort a
      * list in ascending order and then reverse it, which is O(n^2) + O(n)
      * than to sort by both ascending and descending, O(n^2) + O(n^2). 
+     * Note: This is used instead of iterating backward through a list because
+     * that would require multiple versions of big functions in the Week class,
+     * or at least added complexity (this could be a future change).
      */
     public static ArrayList<Task> reverse(ArrayList<Task> arr)
     {
-        //System.out.println("STARTVAL 0\n\n\n\n" + arr.get(0));
-        //System.out.println("STARTVAL END\n\n\n" + arr.get(arr.size()-1));
         int len = arr.size();
         Task temp;
 
@@ -55,8 +52,6 @@ public class TaskList {
             arr.set(i, arr.get(len-i-1));
             arr.set(len-i-1, temp);
         }
-        //System.out.println("ENDVAL 0\n\n\n\n" + arr.get(0));
-        //System.out.println("ENDVAL END\n\n\n\n" + arr.get(arr.size()-1));
         return arr;
     }
 
@@ -64,6 +59,7 @@ public class TaskList {
     /*
      * Method: printTasks
      * Description: Prints whatever the current task list is in the static object
+     * This is not a toString override method since it is a static class.
      */
     public static void printTasks()
     {
@@ -79,6 +75,7 @@ public class TaskList {
     /*
      * Method: printTasks
      * Description: Prints a given task list parameter
+     * This is not a toString override method since it is a static class.  
      */
     public static void printTasks(ArrayList<Task> arr)
     {
@@ -97,9 +94,12 @@ public class TaskList {
      * Description: Sorts an ArrayList of Tasks by a given attribute in
      * ascending order.
      * Arguments:
-     * - arr: ArrayList of Task objects
      * - att: String that represents the attribute by which to sort the Tasks.
-     *        Valid are: importance, hoursRequired, start, due
+     *        Valid strings include:
+     *          - random, importance, hoursRequired, start, due, timeframe,
+     *            restriction, bySmallImportant, and byImportantSmall
+     * Note: this list could be easily increased in size to sort by new
+     * attributes/combinations of attributes.
      * Returns: sorted ArrayList<Task>, but sorting is done in-place
      * Uses: divide()
      */
@@ -121,21 +121,20 @@ public class TaskList {
      * Arguments:
      * - startIndex: where the current sublist begins
      * - endIndex: where the current sublist ends
-     * - att: String that represents the attribute by which to sort the Tasks.
-     *        Valid are: importance, hoursRequired, start, due
+     * - att: refer to sortBy() function description
      * Returns: void, sorting is done in-place
-     * Uses: merger()
+     * Uses: merge()
      */
     public static void divide(int startIndex,int endIndex, String att)
     {        
-        //Divide till you breakdown your list to single element
+        // Divide till you breakdown your list to single element
         if (startIndex<endIndex && (endIndex-startIndex)>=1)
         {
             int mid = (endIndex + startIndex)/2;
             divide(startIndex, mid, att);
             divide(mid+1, endIndex, att);        
             
-            //merging sorted array produce above into one sorted array
+            // Merging sorted array produce above into one sorted array
             merge(startIndex,mid,endIndex,att);            
         }       
     }   
@@ -149,10 +148,9 @@ public class TaskList {
      * - startIndex: where the current sublist begins
      * - midIndex: the middle of the array, (endIndex + startIndex)/2
      * - endIndex: where the current sublist ends
-     * - att: String that represents the attribute by which to sort the Tasks.
-     *        Valid are: importance, hoursRequired, start, due
+     * - att: refer to sortBy() function description
      * Returns: void, sorting is done in-place
-     * Uses: merger()
+     * Uses: merge()
      */
     public static void merge(int startIndex,int midIndex,int endIndex,String att)
     {
@@ -163,30 +161,34 @@ public class TaskList {
         
         while(leftIndex<=midIndex && rightIndex<=endIndex)
         {
+            // lte = left of, since sorts in ascending order by default
+            // if you want to sort high->low, switch < to > below
             boolean lte = false;
 
-            long timeframe1;
-            long timeframe2;
+            long timeframe1, timeframe2;
+            int rating1, rating2;
+            Task left = tasks.get(leftIndex);
+            Task right = tasks.get(rightIndex);
             switch (att)
             {
+                case "random":
+                    if (Math.floor(Math.random()*(10-1+1)+1) <= 5)
+                        lte = true;
+                    break;
                 case "importance":
-                    if (tasks.get(leftIndex).importance <=
-                        tasks.get(rightIndex).importance)
+                    if (left.importance <= right.importance)
                         lte = true;
                     break;
                 case "hoursRequired":
-                    if (tasks.get(leftIndex).hoursRequired <= 
-                        tasks.get(rightIndex).hoursRequired)
+                    if (left.hoursRequired <= right.hoursRequired)
                         lte = true;
                     break;
                 case "start":
-                    if (tasks.get(leftIndex).start.isBefore
-                        (tasks.get(rightIndex).start))
+                    if (left.start.isBefore(right.start))
                         lte = true;
                     break;
                 case "due":
-                    if (tasks.get(leftIndex).due.isBefore
-                        (tasks.get(rightIndex).due))
+                    if (left.due.isBefore(right.due))
                         lte = true;
                     break;
                 case "timeframe":
@@ -205,8 +207,18 @@ public class TaskList {
                     if ((timeframe1 - tasks.get(leftIndex).hoursRequired) <
                         (timeframe2 - tasks.get(rightIndex).hoursRequired))
                         lte = true;
+                case "bySmallImportant":
+                    rating1 = (int) (left.importance * (1/left.hoursRequired));
+                    rating2 = (int) (left.importance * (1/left.hoursRequired));
+                    if (rating1 > rating2)
+                        lte = true;
                     break;
-                
+                case "byImportantSmall":
+                    rating1 = (int) ((1/left.importance) * left.hoursRequired);
+                    rating2 = (int) ((left.importance) * left.hoursRequired);
+                    if (rating1 > rating2)
+                        lte = true;
+                    break;
                 default:
                     Debug.err("Error: incorrect attribute given to sortBy");
             }
@@ -221,7 +233,7 @@ public class TaskList {
             }
         }       
         
-        //Either of below while loop will execute
+        // Either of below while loop will execute
         while(leftIndex<=midIndex)
         {
             mergedSortedArray.add(tasks.get(leftIndex));
@@ -237,7 +249,7 @@ public class TaskList {
         int i = 0;
         int j = startIndex;
 
-        //Setting sorted array to original one
+        // Set sorted array to original one
         while(i < mergedSortedArray.size())
         {
             tasks.set(j, mergedSortedArray.get(i++));

@@ -2,26 +2,31 @@
  * Class: Scheduler
  * Description: Contains the main function for the project.
  * Attributes: none
- * Bugs: none
- * Limitations: none
+ * Bugs: none known
+ * Limitations: output color is not supported for text files, only terminal
  * Author: Sam Waggoner <samuel.waggoner@maine.edu>
  * Created: 12/09/22
  * For: COS 470, scheduler
  * Modifications: none
  * 
  * Instructions: 
- * 1. cd OneDrive\Desktop\COS_470\scheduler
+ * 1. cd OneDrive\Desktop\COS_470\scheduler (or whatever directory this is in)
  * 2. gradle run
  * 
  * Notes:
  * About method comments--since there can be many methods in a class, for
- * ease of readibility, only fields that add value will be included. If fields
+ * ease of readibility only fields that add value will be included. If fields
  * like Author, Created, and For are not listed, refer to the class declaration
  * comment at the top of the file and assume the values to be the same.
+ * 
+ * If you want to direct standard output to a file instead of terminal,
+ * refer to the first line in the main function below.
  */
 
 
+import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.util.ArrayList;
 
 
@@ -33,38 +38,46 @@ public class Scheduler {
  * 1. creates a task list from the input file.
  * 2. creates an initial population of Weeks.
  * 3. selects the best Weeks to continue on to the next generation.
- * 4. mutates those weeks, creating the new generation.
- * 5  repeats from step 3 until a value threshold is met or a number of
+ * 4. TODO: crosses and mutates those weeks and adds the best of the old generation,
+ *    creating the new generation.
+ * 5  TODO: repeats from step 3 until a value threshold is met or a number of
  *    generations is exceeded.
  */
   public static void main(String... args) throws IOException
   {
+
+    // If you wish to redirect output to a text file, make sure the line below
+    // is uncommented. Note that colors are not supported in text files, so
+    // debug statements' special characters will be unrecognized.
+    // System.setOut(new PrintStream(new File("./src/main/resources/output.txt")));
 
     ////////////////////////////////////////////////////////////////////////////
     // Create task list from input file ----------------------------------------
 
     // Create the task list from the input file
     Debug.status("...reading from input file...");
-    TaskList.tasks = TaskCreator.createTaskList
-                                            ("./src/main/resources/input.txt");
+    TaskList.tasks = TaskCreator.createTaskList("./src/main/resources/input.txt");
 
 
     ////////////////////////////////////////////////////////////////////////////
     // Initialize the original population --------------------------------------
 
-    // size of initial population, >= 20 (random calendars created for members = 20+)
-    int numMembers = 25;
+    // As of 12/8/22, there are:
+    // - 11 weeks sorted by various methods
+    // - 6 random weeks
+    // that make up the original population.
 
-    Week[] population = new Week[numMembers];
+    ArrayList<Object[]> population = new ArrayList<Object[]>();
 
 
     // Sort by different attributes and the reverse of each 
-    // Note that sortBy() sorts in ascending order
+    // Note that sortBy() sorts in ascending order UNLESS specefied otherwise,
+    //    for example, if "high->low" is included
+
     Debug.status("...sorting by attributes...");
 
-    ArrayList<Task> orig =
-      (ArrayList<Task>) TaskList.tasks.clone();
-
+    ArrayList<Task> orig= new ArrayList<Task>();
+    orig = (ArrayList<Task>) TaskList.tasks.clone();
 
     ArrayList<Task> byImportance = 
       (ArrayList<Task>) TaskList.sortBy("importance").clone();
@@ -100,192 +113,360 @@ public class Scheduler {
     ArrayList<Task> byRestriction =
       (ArrayList<Task>) TaskList.sortBy("restriction").clone();
 
+    ArrayList<Task> bySmallImportant =
+      (ArrayList<Task>) TaskList.sortBy("bySmallImportant").clone();
+
+    ArrayList<Task> byImportantSmall =
+      (ArrayList<Task>) TaskList.sortBy("byImportantSmall").clone();
+
+    // Note: random isn't completely random. There is a 50% chance that two
+    //       elements in the ArrayList are switched when merging. However, it
+    //       does get increasingly more random as more random lists are built
+    //       upon previous random lists. The original list is used to start.
+
+    TaskList.tasks = orig;
+
+    ArrayList<Task> byRandom1 =
+      (ArrayList<Task>) TaskList.sortBy("random").clone();
+
+    ArrayList<Task> byRandom2 =
+      (ArrayList<Task>) TaskList.sortBy("random").clone();
+
+    ArrayList<Task> byRandom3 =
+      (ArrayList<Task>) TaskList.sortBy("random").clone();
+
+    ArrayList<Task> byRandom4 =
+      (ArrayList<Task>) TaskList.sortBy("random").clone();
+
+    ArrayList<Task> byRandom5 =
+      (ArrayList<Task>) TaskList.sortBy("random").clone();
+
+    ArrayList<Task> byRandom6 =
+      (ArrayList<Task>) TaskList.sortBy("random").clone();
 
 
-    // System.out.println("\n------------------------------------------------" +
+    // DEBUGGING:
+    // To view or ensure correctness of tasks sorted by certain attributes,
+    // uncomment any of the blocks below, or add as desired.
+
+    // Debug.log("\n------------------------------------------------" +
     // "\nOriginal:");
     // TaskList.printTasks(orig);
 
-    // System.out.println("\n------------------------------------------------" +
+    // Debug.log("\n------------------------------------------------" +
     // "\nBy Hours Required:");
     // TaskList.printTasks(byHrsReq);
 
-    // System.out.println("\n------------------------------------------------" +
+    // Debug.log("\n------------------------------------------------" +
     // "\nBy Due Date:");
     // TaskList.printTasks(byDue);
 
-    // System.out.println("\n------------------------------------------------" +
+    // Debug.log("\n------------------------------------------------" +
     // "\nBy Start Date:");
     // TaskList.printTasks(byStart);
 
-    System.out.println("\n------------------------------------------------" +
-    "\nBy Importance:");
-    TaskList.printTasks(byImportance); 
+    // Debug.log("\n------------------------------------------------" +
+    // "\nBy Importance:");
+    // TaskList.printTasks(byImportance); 
 
-    System.out.println("\n------------------------------------------------" +
-    "\nBy Importance Reversed:");
-    TaskList.printTasks(reverseByImportance); 
+    // Debug.log("\n------------------------------------------------" +
+    // "\nBy Importance Reversed:");
+    // TaskList.printTasks(reverseByImportance); 
 
-    // System.out.println("\n------------------------------------------------" +
+    // Debug.log("\n------------------------------------------------" +
     // "\nStatic Original:");
     // TaskList.printTasks();
 
 
-    
-    // By importance, high->low
+
+    // Create weeks (calendars with events) using the sorted task lists
+    Debug.status("...adding events to week...");
+    int numEventsFailed;
+    String name;
+
+
+    // logic: do important tasks first
+    name = "by importance, high->low"; 
     Week imp1 = new Week();
-    population[0] = imp1;
-    imp1.create(reverseByImportance);
+    numEventsFailed = imp1.create(reverseByImportance);
+    Debug.log(numEventsFailed," events were unable to added to the calendar ", name);
+    Object[] pop0 = {imp1, imp1.getWorth(), name};
+    insertSorted(population,pop0);
 
-    Debug.log("population[0]:");
-    Debug.log(population[0]);
-
-    // By hours required, low->high
+    // logic: do small tasks first
+    name = "by hours required, low->high";
     Week length1 = new Week();
-    population[1] = length1;
-    length1.create(byHrsReq);
+    numEventsFailed = length1.create(byHrsReq);
+    Debug.log(numEventsFailed," events were unable to added to the calendar ", name);
+    Object[] len1 = {length1, length1.getWorth(), name};
+    insertSorted(population,len1);
 
-    // By hours required, high->low
+    // logic: do big tasks first
+    name = "by hours required, high->low";
     Week length2 = new Week();
-    population[2] = length2;
-    length2.create(reverseByHrsReq);
+    numEventsFailed = length2.create(reverseByHrsReq);
+    Debug.log(numEventsFailed," events were unable to added to the calendar ", name);
+    Object[] len2 = {length2, length2.getWorth(), name};
+    insertSorted(population,len2);
 
-    // By start date, closest->farthest
+    // logic: don't procrastinate
+    name = "by start date, closest->farthest";
     Week start1 = new Week();
-    population[3] = start1;
-    start1.create(byStart);
+    numEventsFailed = start1.create(byStart);
+    Debug.log(numEventsFailed," events were unable to added to the calendar ", name);
+    Object[] st1 = {start1, start1.getWorth(), name};
+    insertSorted(population,st1);
 
-    // By start date, farthest->closest
+    // logic: get ahead as much as possible
+    name = "by start date, farthest->closest";
     Week start2 = new Week();
-    population[4] = start2;
-    start2.create(reverseByStart);
+    numEventsFailed = start2.create(reverseByStart);
+    Debug.log(numEventsFailed," events were unable to added to the calendar ", name);
+    Object[] st2 = {start2, start2.getWorth(), name};
+    insertSorted(population,st2);
 
-    // By due date, closest->farthest
+    // logic: do tasks that are due sooner
+    name = "by due date, closest->farthest";
     Week due1 = new Week();
-    population[5] = due1;
-    due1.create(byDue);
+    numEventsFailed = due1.create(byDue);
+    Debug.log(numEventsFailed," events were unable to added to the calendar ", name);
+    Object[] d1 = {due1, due1.getWorth(), name};
+    insertSorted(population,d1);
 
-    // By due date, farthest->closest
+    // logic: get ahead as much as possible
+    name = "by due date, farthest->closest";
     Week due2 = new Week();
-    population[6] = due2;
-    due2.create(reverseByDue);
+    numEventsFailed = due2.create(reverseByDue);
+    Debug.log(numEventsFailed," events were unable to added to the calendar ", name);
+    Object[] d2 = {due2, due2.getWorth(), name};
+    insertSorted(population,d2);
 
-    // By timeframe (start - due) 
+    // logic: do tasks that have a specific timeframe first
+    name = "timeframe: (start - due), low->high";
     Week time1 = new Week();
-    population[7] = time1;
-    time1.create(byTimeframe);
+    numEventsFailed = time1.create(byTimeframe);
+    Debug.log(numEventsFailed," events were unable to added to the calendar ", name);
+    Object[] t1 = {time1, time1.getWorth(), name};
+    insertSorted(population,t1);
 
-    // By restriction (start - due) - hoursRequired
+    // logic: do tasks that must be done in a specific timeframe first
+    name = "restriction: (start - due) - hoursRequired, low->high";
     Week rest1 = new Week();
-    population[8] = rest1;
-    rest1.create(byRestriction);
+    numEventsFailed = rest1.create(byRestriction);
+    Debug.log(numEventsFailed," events were unable to added to the calendar ", name);
+    Object[] l1 = {rest1, rest1.getWorth(), name};
+    insertSorted(population,l1);
 
-    // Random
+    // logic: important small events are most important
+    // problem: biased, gives more weight to hours required
+    name = "by smallImportant: importance * 1/hours required, high->low";
+    Week simp1 = new Week();
+    numEventsFailed = simp1.create(bySmallImportant); 
+    Debug.log(numEventsFailed," events were unable to added to the calendar ", name);
+    Object[] si1 = {simp1, simp1.getWorth(), name};
+    insertSorted(population,si1);
+
+    // logic: small important events are most important
+    // problem: biased, gives more weight to hours required
+    name = "importantSmall: 1/importance * hours required, low->high";
+    Week imps1 = new Week();
+    numEventsFailed = imps1.create(byImportantSmall);
+    Debug.log(numEventsFailed," events were unable to added to the calendar ", name);
+    Object[] is1 = {imps1, imps1.getWorth(), name};
+    insertSorted(population,is1);
+
+
     Week rand1 = new Week();
-    population[9] = rand1;
-    rand1.create(orig);
+    numEventsFailed = rand1.create(byRandom1);
+    Debug.log(numEventsFailed," events were unable to added to the calendar random");
+    Object[] r1 = {rand1, rand1.getWorth(), "random"};
+    insertSorted(population,r1);
 
-    // By importance + (10-length), high->low, ending at 9:00pm
+    Week rand2 = new Week();
+    numEventsFailed = rand2.create(byRandom2);
+    Debug.log(numEventsFailed," events were unable to added to the calendar random");
+    Object[] r2 = {rand2, rand2.getWorth(), "random"};
+    insertSorted(population,r2);
 
-    // By importance + (10-length) - distance to due date, high->low, ending at 9:00pm
+    Week rand3 = new Week();
+    numEventsFailed = rand3.create(byRandom3);
+    Debug.log(numEventsFailed," events were unable to added to the calendar random");
+    Object[] r3 = {rand3, rand3.getWorth(), "random"};
+    insertSorted(population,r3);
 
-    // By importance + (20-length) - distance to due date, high->low, ending at 9:00pm
+    Week rand4 = new Week();
+    numEventsFailed = rand4.create(byRandom4);
+    Debug.log(numEventsFailed," events were unable to added to the calendar random");
+    Object[] r4 = {rand4, rand4.getWorth(), "random"};
+    insertSorted(population,r4);
 
-    // By importance + (30-length) - distance to due date, high->low, ending at 9:00pm
+    Week rand5 = new Week();
+    numEventsFailed = rand5.create(byRandom5);
+    Debug.log(numEventsFailed," events were unable to added to the calendar random");
+    Object[] r5 = {rand5, rand5.getWorth(), "random"};
+    insertSorted(population,r5);
 
-    // By importance + (40-length) - distance to due date, high->low, ending at 9:00pm
-
-    // By importance + (40-length) - distance to due date, high->low, ending at 9:00pm
-
-    // By importance, high->low, ending at 12:00pm
-
-    // By length, low->high, ending at 12:00pm
-
-    // By length, high->low, ending at 12:00pm
-
-    // By due date, closest->farthest, ending at 12:00pm
-
-    // By importance + (10-length), high->low, ending at 12:00pm
-
-    // By importance + (10-length) - distance to due date, high->low, ending at 12:00pm
-
-    // By importance + (20-length) - distance to due date, high->low, ending at 12:00pm
-
-    // By importance + (30-length) - distance to due date, high->low, ending at 12:00pm
-
-    // By importance + (40-length) - distance to due date, high->low, ending at 12:00pm
-
-    // By importance + (40-length) - distance to due date, high->low, ending at 12:00pm
-
-    // (members-20) random calendars
+    Week rand6 = new Week();
+    numEventsFailed = rand6.create(byRandom6);
+    Debug.log(numEventsFailed," events were unable to added to the calendar random");
+    Object[] r6 = {rand6, rand6.getWorth(), "random"};
+    insertSorted(population,r6);
 
 
-    // // Print weeks
-    // for (int i=0; i < population.length; i++)
-    // {
-    //   if (population[i] != null)
-    //   {
-    //     Debug.status("...printing week ", i);
-    //     Debug.log(population[i]);
-    //   }
-    // }
+    // Print weeks in order by worth
+    Debug.status("...printing weeks...");
+    for (int i=0; i < population.size(); i++)
+    {
+      if (population.get(i)[0] != null)
+      {
+        Debug.log("Rank(",i+1,"), ",population.get(i)[2],"-- with worth ",population.get(i)[1]);
+        Debug.log(population.get(i)[0]);
+      }
+    }
+
+    // Print only each weeks's worth
+    Debug.status("...printing weeks' rankings by worth...");
+    for (int i=0; i < population.size(); i++)
+    {
+      if (population.get(i)[0] != null)
+        Debug.log("Rank(",i+1,"), ",population.get(i)[2],"-- with worth ",population.get(i)[1]);
+    }
 
 
-
-    // number of survivors each generation
-    int numSurvivors = 15;
-
-    // percent mutation (random changes to single calendar in the group of survivors)
-    double mutationRate = .30; 
-
-    // percent crossover (combination between two calendars)
-    double crossoverRate = 1-mutationRate;
-
-    // number of generations
-    int numGenerations = 5;
 
     ////////////////////////////////////////////////////////////////////////////
-    // Select the s best calendars ---------------------------------------------
+    // Program unfinished from this point onward -------------------------------
+    // - At this point, the initial population has been created. Their worths
+    //   have each been calculated, and they are sorted by those worths.
+    // - What is left to do:
+    //    - Select n best weeks as survivors (simply grab 0-n of the sorted list)
+    //    - Perform crossover and mutation to create the next generation, adding
+    //      the best m weeks from the previous generation (elitism)
+    //    - Use the methods I have written to sort the calendars by worth
+    //    - Repeat until desired
+    //        - for q iterations
+    //        - or for a certain amount of time
+    //        - or until the best calendar has a fitness above a given threshold
 
-    // The fitness function incorporates 
-    // reprimanded for events late in the night or early in the morning
-    // rewarded for the amount of worth
 
-    // Percent miosis (single reproduction)
-    // Percent reproduction (merger)
-    // Start size
 
-    /**
-     * Types of modifications/evolutions:
-     * - Big changes:
-     *      - Replacing events 
+  
+    // number of surviving weeks each generation
+    // (as of 12/8/22, this is out of a population size of 17)
+    int numSurvivors = 10;
+
+    // percent mutation
+    // (chance of random changes happening to single event in a survivor week)
+    double mutationRate = .30; 
+
+    // percent crossover
+    // (chance of a combination between two or more calendars in each survivor week)
+    double crossoverRate = 0.50;
+
+    // number of generations
+    int numGenerations = 10;
+
+
+
+    ////////////////////////////////////////////////////////////////////////////
+    // Perform crossover and mutation ---------------------------------------------
+
+    /*
+     * for i from 0 to numGenerations (or time or worth threshold met)
+     *  evolve(population)
+     * 
+     * newPopulation.get(0) // this is our best result after numGenerations
+     * 
+     * 
+     * function evolve(population)
+     *  ArrayList<Week> newPopulation = new ArrayList<Week>();
+     *  ArrayList<Week> survivors = population.get(0 - numSurvivors)
+     *  for week in survivors
+     *    crossover? = if random(0,1) > (1-crossoverRate)
+     *    if crossover
+     *      randomStartingPoint = random(0,survivors.size())
+     *      for j from randomStartingPoint to (min (survivors.size(), randStartPt + 3))
+     *        // check compatability for sectional crossover by trying to find
+     *        // an event 1/3 - 2/3 through the week that ends at the same time
+     *        // on both weeks. The weeks will be split on this event.
+     *        if compatible
+     *          // switch sections. not front->back (because then you would have
+     *          // to check each event to make sure it is not violating its
+     *          // start and due times), but back->back or front->front
+     *          break
+     *    for event in week
+     *      mutate? = if random(0,1) > (1-mutationRate)
+     *      if mutate
+     *        // shorten or lengthen the event, shortening or lengthing neighbor events
+     *        // or, swap the event with another in the calendar, if the start
+     *        // and due times are compatible and the durations are the same
+     *    newPopulation.insertSorted(week)
+     * 
+     *  // Add the best of the previous generation (elitism)
+     *  newPopulation.insertSorted(population[0 - (population.length - numSurvivors)])
+     * 
+     * 
+     * 
+     * OR, using a different approach:
+     * - associate the ordered ArrayList<Task> with the week. The same order of
+     *    tasks will create the same week every time. Thus, instead of modifying
+     *    the week itself (which is difficult and slow because it involves
+     *    constraint satisfaction), modify the order of the tasks. 
+     *    
      */
 
-    // Create start population of start size
 
-    // For n iterations (or for a certain amount of time)? (or until fitness > q)?
-    
-    
-    // Perform insertion sort on the weeks by their total worth,
-    // and select the best to survive.
-    // List<Week> survivors = InsertionSort.sort(weeks).subList(0,numSurvivors);
-
-    
-    // List<Week> survivors = weeks.sort(Comparator.comparing(Week.totalWorth)).subList(0,numSurvivors);
-
-    // // 
-    // for (int i=0; i < numGenerations; i++)
-    // {
-    //   for (int j=0; j < numSurvivors; j++)
-    //   {
-    //     Week week =  survivors.get(j);
-    //     // mutate week
-    //     weeks.add(week);
-    //   }
-    // }
   }
 
 
+  /*
+  * Static Method: insertSorted
+  * Description: Inserts a week into the population array such that the 
+  * population array stays sorted by worth in descending order.
+  * Arguments:
+  * - population: the list of weeks in the generation
+  * - weekElement: an array containing information about a week, in the format:
+        [Week week, double worth, String sortedBy] (but typed only as objects)
+  * Returns: void, sorting is done in-place
+  */
+  public static void insertSorted(ArrayList<Object[]> population, Object[] weekArr)
+  {
+    int length = population.size();
+
+    if (length == 0)
+    {
+      population.add(weekArr);
+      return;
+    }
+
+    for (int i=0; ; i++)
+    {
+      if ((double) (weekArr[1]) >= (double) (population.get(i)[1]))
+      {
+        population.add(i,weekArr);
+        return;
+      }
+      if (i+1 == length)
+      {
+        // At this point, weekArr's worth is lower than population.get(i)'s,
+        // so add at the end
+        population.add(weekArr);
+        return;
+      }
+    }
+  }
+
+
+  /*
+   * Method: checkDue
+   * Note: unused and only for debugging purposes
+   * Description: Can be used to check the correctness (without printing and seeing
+   * it visually) of a list of tasks sorted by due date. This could easily be
+   * modified to check validity of sorting by other attributes as well.
+   * Arguments:
+   * - arr: a list of tasks that should be sorted by due date
+   * Returns: void, but prints out its result
+   */
   public static void checkDue(ArrayList<Task> arr)
   {
     String res = "not failed due";
@@ -296,7 +477,7 @@ public class Scheduler {
         res = "failed due";
       }
     }
-    System.out.println(res);
+    Debug.log(res);
   }
 }
 

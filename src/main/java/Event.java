@@ -1,13 +1,10 @@
 /*
  * Abstract Class: Event
  * Description: Represents an event on a calendar. Used in a Week.
+ * Attributes: described below
+ * Bugs: none known
+ * Limitations: none
  * Author: Sam Waggoner <samuel.waggoner@maine.edu>
- * Attributes:
- * - startTime: when the event starts
- * - endTime: when the event ends
- * - task: the index of TaskList's tasks array that the event is
- *      representing. -1 means the start of the week, and -2 means the end of
- *      of the week.
  * Created: 12/09/22
  * For: COS 470, scheduler
  * Modifications: none
@@ -15,17 +12,17 @@
 
 
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 
 
 public class Event {
 
 
-    public LocalDateTime startTime;
-    public LocalDateTime endTime;
-    public Task task;
+    public LocalDateTime startTime;    // when the event starts
+    public LocalDateTime endTime;      // when the event ends
+    public Task task;                  // reference to the task that the event is for
 
     
+    // Standard and only constructor
     public Event (LocalDateTime startTime, LocalDateTime endTime, Task task)
     {
         this.startTime = startTime;
@@ -35,26 +32,12 @@ public class Event {
 
 
     /*
-     * Method: getWorth
-     * Description: Returns the worth of the event.
-     * Arguments: none
-     * Returns: float, length of event * importance of event
-     * Author: Sam Waggoner <samuel.waggoner@maine.edu>
-     * Created: 12/09/22
-     * For: COS 470, scheduler
-     * Modifications: none
-     */
-    
-    public float getWorth()
-    {
-        return this.task.importance * ChronoUnit.HOURS.between(startTime, endTime);
-    }
-
-
-    /*
      * Method: toString
      * Description: Prints out the label, day of week, and start and end times
-     * of the event
+     * of the event in a readable way.
+     * Note: Only prints the starting day--if "sleep" starts on Wednesday 11:30 PM
+     * and ends on Thursday 7:30 AM, it will print (without formatting):
+     * Wednesday, From 11:30 PM to 7:30 AM
      * Arguments: none
      */
     @Override

@@ -6,7 +6,7 @@
  * of every event in the week, then it is unscheduled time.
  * Attributes:
  * - int totalWorth: The total worth calculated for the calendar.
- * Bugs: none
+ * Bugs: none known
  * Limitations: none
  * Input Requirements: travel/transition time should be incorporated into the 
  * events themselves. If it takes 15 minutes to walk to class, then the class
@@ -27,8 +27,8 @@ import java.util.ArrayList;
 public class Week {
 
 
-    public int totalWorth;
     public ArrayList<Event> events;
+    public ArrayList<Task> tasks;
 
 
     public Week(){}
@@ -38,9 +38,42 @@ public class Week {
         this.events = week;
     }
 
-    public int createRandom(ArrayList<Task> tasks)
+    public double getWorth()
     {
+        boolean prevDebugEnabled = Debug.enabled;
+        Debug.enabled = false;
         
+        for (Event event : this.events)
+        {
+            if (event.task != null)
+            {
+                double duration = ChronoUnit.MINUTES.between(event.startTime, event.endTime);
+                event.task.hrsInCalendar += duration;
+            }
+        }
+
+        double worthSum = 0;
+        for (Task task : this.tasks)
+        {
+            Debug.log("Task Importance: ", task.importance);
+            Debug.log("Task estimated task: ", task.hoursRequired);
+            Debug.log("Task Hours in Calendar: ", task.hrsInCalendar);
+
+            if (task.hrsInCalendar < 0)
+                // If task not in calendar, it has no worth
+                continue;
+            double taskWorth = (0.8 * task.importance) / 
+                    (1 + Math.exp(-1*task.hrsInCalendar+0.8*task.hoursRequired))
+                    + 0.2 * task.importance;
+            worthSum += taskWorth;
+            Debug.log("Worth of ", task.label,": ",taskWorth);
+        }
+
+        Debug.enabled = prevDebugEnabled;
+
+        // Round to three digits
+        worthSum = Math.round(worthSum*1000.0)/1000.0;
+        return worthSum;
     }
 
 
@@ -55,6 +88,9 @@ public class Week {
     {
         boolean prevDebugEnabled = Debug.enabled;
         Debug.enabled = true;
+
+        // Add task reference to this object for calculating worth
+        this.tasks = tasks;
 
         // Check if calendar already exists for object
         if (this.events != null)
@@ -75,7 +111,6 @@ public class Week {
         this.events.add(endWk);
 
         // Add each of the tasks in the given tasks list
-        Debug.status("...adding events to calendar...");
         int numEventsFailed = 0;
         for (Task task : tasks)
         {
@@ -88,11 +123,6 @@ public class Week {
         return numEventsFailed;
     }
 
-
-    public int getTotalWorth()
-    {
-        return this.totalWorth;
-    }
 
     /* 
      * Method: addEvent
@@ -110,7 +140,8 @@ public class Week {
     /**
      * Pseudocode for addEvent():
      * 
-     * // youre trying to insert AFTER event and BEFORE the next event
+     * // note that you're trying to insert AFTER the event you're "on" and
+     * // BEFORE the next event
      * for event in events
      *  if event.label = endOfweek:
      *      // FAIL, return fail
@@ -140,27 +171,34 @@ public class Week {
      */
     public boolean addEvent(Task task)
     {
+        boolean prevDebugEnabled = Debug.enabled;
+        Debug.enabled = false;
+
         Debug.log("\n\nAdding event ", task.label);
         Debug.log("to week");
         Debug.log(this);
+
         for (int i=0; i < this.events.size(); i++)
         {
-            if (this.events.get(i).endTime == LocalDate.now().atTime(23,59,59).plusDays(7))
+            if (this.events.get(i).endTime.isEqual(LocalDate.now().plusDays(8).atTime(0,0,0)))
             {
                 // FAIL, no space in calendar
                 Debug.log("Task ",task.label,", due on ",task.due," was unable",
                     " to be added because the calendar is completely full.");
+                Debug.enabled = prevDebugEnabled;
                 return false;
             }
             if (task.due.isBefore(this.events.get(i).endTime))
             {
                 // FAIL, Due date already passed
-                Debug.log("Task ",task.label,", due on ",task.due," was unable",
-                    " to be added because the calendar is full up to its due date.");
+                Debug.log("Task ",task.label,", due on ",task.due," was unable\n",
+                    " to reach its required hours to finish because the calendar",
+                    " is full up to its due date.");
+                Debug.enabled = prevDebugEnabled;
                 return false;
             }
             if (ChronoUnit.MINUTES.between(
-                this.events.get(i).endTime, this.events.get(i+1).startTime) <= 1)
+                this.events.get(i).endTime, this.events.get(i+1).startTime) <= 5)
             {
                 Debug.log("Skipping over event ", this.events.get(i));
                 continue;
@@ -179,6 +217,7 @@ public class Week {
                         task);
                     events.add(i+1, newEvent);
                     // return true, indicating a successful insertion
+                    Debug.enabled = prevDebugEnabled;
                     return true;
                 }
                 // If the task is longer then available time
@@ -208,6 +247,7 @@ public class Week {
                         task);
                     events.add(i+1, newEvent);
                     // return true, indicating a successful insertion
+                    Debug.enabled = prevDebugEnabled;
                     return true;
                 }
                 // If the task is longer then available time
@@ -225,18 +265,20 @@ public class Week {
             }
             Debug.log("checking next event, start hasn't occurred yet");
         }
+        Debug.enabled = prevDebugEnabled;
         return false;
     }
 
     
     /*
-     * Method: toString (previously printWeek)
-     * Description: Prints the events in the week.
+     * Method: toString
+     * Description: Prints the events in the week in an comprehensible way.
+     * Returns: "", does the printing itself
      */
     @Override
     public String toString()
     {
-        System.out.println("-----------------------------------------------");
+        System.out.println("----------------------------------------");
         System.out.println("-----------------------------------------------\n");
         for (Event event : this.events)
         {

@@ -75,7 +75,10 @@ public abstract class TaskCreator {
 
         // Optional third parameter: start date, default: Today
         if (subParts.length > 3)
-          System.err.println("Error: incorrect task format, too many parameters");
+        {
+          Debug.err("Incorrect task format, too many parameters");
+          System.exit(1);
+        }
         else if (subParts.length == 3)
           task.setStart(formatDate(subParts[2]));
 
@@ -93,6 +96,7 @@ public abstract class TaskCreator {
     {
       System.err.println("Error creating tasks from input file. The input file "
       + "should be at ./src/main/resources/input.txt");
+      System.exit(1);
     }
 
     finally
@@ -136,7 +140,7 @@ public abstract class TaskCreator {
       task = new Task("Physical Activity", 8, 1, start, end);
       taskList.add(task);
       // Add sleep
-      start = today.plusDays(i).atTime(22, 30, 00);
+      start = today.plusDays(i).atTime(23, 30, 00);
       end = today.plusDays(i).atTime(10, 00, 00);
       task = new Task("Sleep", 10, 8, start, end);
       taskList.add(task);
@@ -243,8 +247,9 @@ public abstract class TaskCreator {
           month = Month.of(12);
           break;
         default:
-          System.err.println("Error: Date formatted incorrectly in task for date "
-          + date + " and monthstring: " + monthStr + ".");
+          Debug.err("Date formatted incorrectly in task for date ",date," and ",
+            "monthstring: " + monthStr);
+          System.exit(1);
       }
 
       int day;

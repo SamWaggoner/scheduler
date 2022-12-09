@@ -26,6 +26,8 @@ public class Task {
     public double hoursRequired;    // estimated hours required to finish task
     public LocalDateTime start;     // date when you may start working on it
     public LocalDateTime due;       // date by which it must be finished
+    public double hrsInCalendar;    // total hours in a calendar, used for
+                                    // calculating worth
 
 
     public Task (){}
@@ -68,8 +70,11 @@ public class Task {
     }
 
 
-    // Unused setter methods to cleanse input if desired -----------------------
-
+    /*
+     * Method: setLabel
+     * Description: Used to set the label of a task. Could be modified to
+     * sanitize input.
+     */
     public boolean setLabel(String label)
     {
         this.label = label;
@@ -77,6 +82,11 @@ public class Task {
     }
 
 
+    /*
+     * Method: setNotes
+     * Description: Used to set the notes of a task. Could be modified to
+     * sanitize input.
+     */
     public boolean setNotes(String notes)
     {
         this.notes = notes;
@@ -84,68 +94,80 @@ public class Task {
     }
 
 
-    public boolean setImportance(int imp)
+    /*
+     * Method: setImportance
+     * Description: Used to set the importance of a task. Sanitizes input, makes
+     * sure integer is 1-10 inclusive.
+     */
+    public void setImportance(int imp)
     {
         if (imp > 0 && imp < 11)
         {
             this.importance = imp;
-            return true;
+            return;
         }
-        System.err.println("Error: Importance must be 0-10");
-        return false;
+        Debug.err("Error: Importance must be 0-10, given: ",imp);
+        System.exit(1);
     }
 
 
-    public boolean setHoursRequired(double hrs)
+    /*
+     * Method: setImportance
+     * Description: Used to set the hours required of a task. Sanitizes input,
+     * makes sure hours is positive.
+     */
+    public void setHoursRequired(double hrs)
     {
         if (hrs > 0)
         {
             this.hoursRequired = hrs;
-            return true;
+            return;
         }
-        System.err.println("Error: Hours required must be positive integer");
-        return false;
+        Debug.err("Error: Hours required must be positive integer, given: ",hrs);
+        System.exit(1);
     }
 
 
-    public boolean setStart(LocalDateTime start)
+    /*
+     * Method: setStart
+     * Description: Used to set when you can start working on a task. Sanitizes
+     * input, makes sure start date is not before when it is due.
+     */
+    public void setStart(LocalDateTime start)
     {
         if (this.due == null || this.due != null && this.due.isAfter(start))
         {
             this.start = start;
-            return true;
+            return;
         }
-        System.err.println("Error: Start date must be before due date");
-        return false;
+        Debug.err("Error: Start date must be before due date (",this.due,") for",
+            " given start date: ",start);
+        System.exit(1);
     }
 
 
-    public boolean setDue(LocalDateTime due)
+    /*
+     * Method: setDue
+     * Description: Used to set the due date of a task. Sanitizes input, makes
+     * sure due date is not before you can start working on the task.
+     */
+    public void setDue(LocalDateTime due)
     {
         if (this.start == null || this.start != null && this.start.isBefore(due))
         {
             this.due = due;
-            return true;
+            return;
         }
-        System.err.println("Error: Due date must be after start date");
-        return false;
+        Debug.err("Due date must be after start date (",this.start,") for given",
+        " due date: ",due);
+        System.exit(1);
     }
 
-    /* UNUSED
-     * Method: printData
-     * Description: Prints out the information of this task in a formatted way.
+
+    /*
+     * Method: toString
+     * Description: Returns all of the information about the task in a formatted way.
      */
-    public void printData()
-    {
-        System.out.println("Task: " + this.label);
-        System.out.println("    Notes: " + this.notes);
-        System.out.println("    Importance: " + this.importance);
-        System.out.println("    Hours Required: " + this.hoursRequired);
-        System.out.println("    Start Date: " + this.start);
-        System.out.println("    Due Date: " + this.due + "\n");
-    }
-
-
     @Override
     public String toString() {
         return "Task: " + label + "\n\t notes: " + notes + "\n\t importance: " + 

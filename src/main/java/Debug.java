@@ -1,19 +1,35 @@
 /*
  * Class: Debugger
  * Description: Quick class for outputting debugging information. Can be enabled
- * or disabled.
+ * or disabled on a global scale in this class.
  * Attributes: none
- * Bugs: none
- * Limitations:
- * - Can only print single objects, unlike stdio. 
+ * Bugs: none known
+ * Limitations: none
  * Author: Sam Waggoner <samuel.waggoner@maine.edu>
  * Created: 12/09/22
  * For: COS 470, scheduler
  * Modifications: none
  * 
  * Instructions: 
- * Debug is enabled by default. To disable debugger, set Debug.enabled to false.
- * To use Debug, simply do something like "Debug.log("Adding objects");""
+ * Debug is enabled by default. To globally disable debugger, set Debug.enabled
+ * below to false. To use Debug, simply do something like
+ * "Debug.log("Adding objects");
+ * 
+ * Notes:
+ * Even if Debug is enabled, it will not print every Debug statement--this is
+ * because some individual functions contain blocks like:
+ * 
+ *  func()
+ *      boolean prevDebugEnabled = Debug.enabled;
+ *      Debug.enabled = false;
+ *      // code in the function
+ *      Debg.enabled = prevDebugEnabled;
+ * 
+ * This is done because this allows for users to print information about functions
+ * they are interested in as a whole, and turn off other functions. Thus, if
+ * Debug is disabled on a global scale, no debug messages will appear. If Debug
+ * is enabled on a global scale, it will not necessarily print all Debug messages,
+ * since certain functions could disable it temporarily.
  */
 
 
@@ -34,18 +50,24 @@ public class Debug {
 
     /*
     * Method: log
-    * Description: To be used for general debugging purposes, fixing code.
+    * Description: To be used for general debugging purposes, fixing code, or
+    * low-level information.
     */
-    // public static void log(Object o){
-    //     if(Debug.enabled) {
-    //         System.out.println(TEXT_YELLOW+"DEBUG::"+TEXT_RESET+o.toString());
-    //     }           
-    // }
     public static void log(Object ... objects){
         if(Debug.enabled) {
             System.out.print(TEXT_YELLOW+"DEBUG::"+TEXT_RESET);
+            if (objects == null)
+            {
+                System.out.print("no argument given to Debug.log");
+                return;
+            }
             for (Object o : objects)
             {
+                if (o == null)
+                {
+                    System.out.print("null");
+                    continue;
+                }
                 System.out.print(o.toString());
             }
             System.out.print("\n");
@@ -55,13 +77,24 @@ public class Debug {
 
     /*
      * Method: status
-     * Description: To be used for showing program progress status.
+     * Description: To be used for showing program progress status; large-
+     * picture program status updates.
      */
     public static void status(Object ... objects){
         if(Debug.enabled) {
             System.out.print(TEXT_GREEN+"STATUS::"+TEXT_RESET);
+            if (objects == null)
+            {
+                System.out.print("no argument given to Debug.log");
+                return;
+            }
             for (Object o : objects)
             {
+                if (o == null)
+                {
+                    System.out.print("null");
+                    continue;
+                }
                 System.out.print(o.toString());
             }
             System.out.print("\n");
@@ -71,13 +104,24 @@ public class Debug {
 
     /*
      * Method: err
-     * Description: To be used for displaying semantic/logic errors.
+     * Description: To be used for displaying semantic/logic errors. Does not
+     * end the program, only prints a red error.
      */
     public static void err(Object ... objects){
         if(Debug.enabled) {
             System.out.print(TEXT_RED+"ERROR::"+TEXT_RESET);
+            if (objects == null)
+            {
+                System.out.print("no argument given to Debug.log");
+                return;
+            }
             for (Object o : objects)
             {
+                if (o == null)
+                {
+                    System.out.print("null");
+                    continue;
+                }
                 System.out.print(o.toString());
             }
             System.out.print("\n");
